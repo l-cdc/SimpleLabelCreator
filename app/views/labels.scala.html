@@ -1,0 +1,35 @@
+@(form: Form[LabelForm.Data], postUrl: Call)(implicit request: MessagesRequestHeader)
+
+@main("Simple Label Creator") {
+    <section id="top">
+        <div class="wrapper">
+            <h1>Simple Label Creator</h1>
+        </div>
+    </section>
+
+    <p>This tool will create a PDF containing 1.7cm x 0.7cm labels on an A4 page, ready for printing and cutting. For
+        now, no settings are available.</p>
+
+    <p>Enter your semicolon-separated values in the field field below. Each row corresponds to a label, and each of the
+        four columns correspond to rows in the generated labels.</p>
+
+    @if(form.hasGlobalErrors) {
+        <ul>
+        @form.globalErrors.map { error: FormError =>
+            <li>@error.format</li>
+        }
+        </ul>
+    }
+
+    @helper.form(postUrl) {
+        @helper.CSRF.formField
+
+        @helper.textarea(form("labels"),
+            Symbol("_label") -> "Label Data",
+            Symbol("rows") -> 25,
+            Symbol("cols") -> 80
+        )
+
+        <button>Create Labels</button>
+    }
+}
