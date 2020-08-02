@@ -1,6 +1,8 @@
 name := "SimpleLabelCreator"
  
 version := "0.1.0"
+
+maintainer := "Lorenzo Costanzia di Costigliole <lorenzo.costanzia@gmail.com>"
       
 lazy val `labelCreator` = (project in file(".")).enablePlugins(PlayScala)
 
