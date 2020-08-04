@@ -1,0 +1,39 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      java: corretto11
+  pre_build:
+    commands:
+      - echo "Getting credentials for AWS ECR"
+      - $(aws ecr get-login --no-include-email --region eu-west-1)
+      - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-8)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - "echo \"Repository URI: $REPOSITORY_URI\""
+      - "echo \"Image Tag: $IMAGE_TAG\""
+      - "echo \"Task Definition Container Name: $CONTAINER_NAME\""
+      # Retrieve latest for caching
+      - docker pull $REPOSITORY_URI:latest || true
+  build:
+    commands:
+      - echo "Building Application"
+      - sbt -Dsbt.log.noformat=true universal:packageZipTarball
+      - tar -xzvf target/universal/*.tgz
+      - mv simplelabelcreator-* simplelabelcreator
+      - docker build -t $REPOSITORY_URI:latest -t $REPOSITORY_URI:$IMAGE_TAG .
+      - docker push $REPOSITORY_URI
+  post_build:
+    commands:
+      - echo Writing image definition files for CodeDeploy...
+      # For regular ECS deployments. The filename is arbitrary
+      - printf '[{"name":"%s","imageUri":"%s"}]' $CONTAINER_NAME $REPOSITORY_URI:$IMAGE_TAG > imageDefinitions.json
+
+artifacts:
+  files:
+    - imageDefinitions.json
+
+cache:
+  paths:
+    - '~/.ivy2/cache/**/*'
+    - '~/.cache/coursier/**/*'
