@@ -46,7 +46,8 @@ class LabelsController @Inject()(messagesAction: MessagesActionBuilder, componen
       Ok.sendFile(
         content = file,
         inline = false,
-        fileName = _ => Some("labels.pdf")
+        fileName = _ => Some("labels.pdf"),
+        onClose = () => file.delete()
       )
     }
 
