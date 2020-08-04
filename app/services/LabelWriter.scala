@@ -15,10 +15,12 @@ object LabelWriter {
   private final val PT_PER_CM = 28.3464566929f
   private final val LABEL_WIDTH = UnitValue.createPointValue(1.7f * PT_PER_CM)
   private final val LABEL_HEIGHT = UnitValue.createPointValue(0.7f * PT_PER_CM)
-  private final val LABEL_FONT =  PdfFontFactory.createFont(StandardFonts.TIMES_ROMAN)
+  private final val LABEL_FONT = StandardFonts.TIMES_ROMAN
   private final val LABEL_FONT_SIZE =  3f
 
   def createLabels(content: Seq[Label], dest: File): Unit = {
+    // Created font is document specific and cannot be reused
+    val font = PdfFontFactory.createFont(LABEL_FONT)
     val pdfDoc = new PdfDocument(new PdfWriter(dest))
     val doc = new Document(pdfDoc)
 
@@ -27,8 +29,8 @@ object LabelWriter {
 
     content.foreach( lbl => {
       val para = new Paragraph(lbl.paragraph)
+        .setFont(font)
         .setFontSize(LABEL_FONT_SIZE)
-        .setFont(LABEL_FONT)
         .setWidth(LABEL_WIDTH)
         .setHeight(LABEL_HEIGHT)
       table.addCell(para)
