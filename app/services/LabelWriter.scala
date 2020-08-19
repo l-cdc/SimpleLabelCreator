@@ -45,6 +45,8 @@ object LabelWriter extends Logging {
       val para = new Paragraph(lbl.paragraph)
         .setFont(font)
         .setFontSize(fontSize)
+        .setWidth(LABEL_WIDTH)
+        .setHeight(LABEL_HEIGHT)
         .setFixedLeading(LABEL_MAX_FONT_SIZE)
       table.addCell(para)
     })
