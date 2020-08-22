@@ -17,9 +17,13 @@ object LabelWriter extends Logging {
   private final val LABEL_WIDTH = UnitValue.createPointValue(1.7f * PT_PER_CM)
   private final val LABEL_HEIGHT = UnitValue.createPointValue(0.7f * PT_PER_CM)
   private final val LABEL_FONT = StandardFonts.TIMES_ROMAN
-  // Height of label minus some padding (1 pt), divided by four lines
-  // This is also used as fixed leading in paragraphs (so lines remain horizontally aligned)
-  private final val LABEL_MAX_FONT_SIZE = LABEL_HEIGHT.getValue / 4f
+  /** Max font size due to height of label
+   *
+   * Height of label minus some padding, divided by four lines
+   * This is also used as fixed leading in paragraphs (so lines of
+   * different font sizes remain horizontally aligned)
+   */
+  private final val LABEL_MAX_FONT_SIZE = (LABEL_HEIGHT.getValue - 0.6f) / 4f
 
   private def computeOptimalFontSize(font: PdfFont, text: Label) = {
     // Get width of longest line
