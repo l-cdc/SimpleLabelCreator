@@ -63,6 +63,12 @@ object LabelWriter extends Logging {
 
       table.addCell(cell)
     })
+
+    // Complete the last row with empty cells
+    val rem = content.length % LABELS_PER_ROW
+    if (rem != 0)
+      (rem + 1 to LABELS_PER_ROW) foreach (_ => table.addCell(""))
+
     table.complete()
 
     doc.close()
