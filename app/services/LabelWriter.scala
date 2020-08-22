@@ -6,7 +6,7 @@ import com.itextpdf.io.font.constants.StandardFonts
 import com.itextpdf.kernel.font.{PdfFont, PdfFontFactory}
 import com.itextpdf.kernel.pdf.{PdfDocument, PdfWriter}
 import com.itextpdf.layout.Document
-import com.itextpdf.layout.element.{Paragraph, Table}
+import com.itextpdf.layout.element.{Cell, Paragraph, Table}
 import com.itextpdf.layout.property.UnitValue
 import models.Label
 import play.api.Logging
@@ -24,6 +24,7 @@ object LabelWriter extends Logging {
    * different font sizes remain horizontally aligned)
    */
   private final val LABEL_MAX_FONT_SIZE = (LABEL_HEIGHT.getValue - 0.6f) / 4f
+  private final val LABELS_PER_ROW = 10
 
   private def computeOptimalFontSize(font: PdfFont, text: Label) = {
     // Get width of longest line
@@ -41,7 +42,10 @@ object LabelWriter extends Logging {
     val pdfDoc = new PdfDocument(new PdfWriter(dest))
     val doc = new Document(pdfDoc)
 
-    val table = new Table(10)
+    val table = new Table(UnitValue.createPercentArray(LABELS_PER_ROW))
+      .setWidth(LABELS_PER_ROW*LABEL_WIDTH.getValue)
+      .setFixedLayout()
+
     doc.add(table)
 
     content.foreach( lbl => {
@@ -49,10 +53,13 @@ object LabelWriter extends Logging {
       val para = new Paragraph(lbl.paragraph)
         .setFont(font)
         .setFontSize(fontSize)
-        .setWidth(LABEL_WIDTH)
-        .setHeight(LABEL_HEIGHT)
         .setFixedLeading(LABEL_MAX_FONT_SIZE)
-      table.addCell(para)
+
+      val cell = new Cell()
+        .add(para)
+        .setHeight(LABEL_HEIGHT)
+
+      table.addCell(cell)
     })
     table.complete()
 
