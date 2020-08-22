@@ -54,10 +54,12 @@ object LabelWriter extends Logging {
         .setFont(font)
         .setFontSize(fontSize)
         .setFixedLeading(LABEL_MAX_FONT_SIZE)
+        .setMargin(0)
 
       val cell = new Cell()
         .add(para)
         .setHeight(LABEL_HEIGHT)
+        .setPadding(1)
 
       table.addCell(cell)
     })
