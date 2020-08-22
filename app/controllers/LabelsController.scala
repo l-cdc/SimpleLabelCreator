@@ -18,11 +18,11 @@ class LabelsController @Inject()(messagesAction: MessagesActionBuilder, componen
     Data("label 1!;line 2 of label 1;line 3 of label 1;line 4 of label 1\nlabel 2!;line 2 of label 2;line 3 of label 2;line 4 of label 2")
   )
 
-  def labels = messagesAction { implicit request: MessagesRequestHeader =>
+  def labels: Action[AnyContent] = messagesAction { implicit request: MessagesRequestHeader =>
     Ok(views.html.labels(exampleLabels, postUrl))
   }
 
-  def createLabels = messagesAction { implicit request: MessagesRequest[AnyContent] =>
+  def createLabels: Action[AnyContent] = messagesAction { implicit request: MessagesRequest[AnyContent] =>
     val errorFunction = { formWithErrors: Form[Data] =>
       // This is the bad case, where the form had validation errors.
       // Let's show the user the form again, with the errors highlighted.
@@ -34,9 +34,10 @@ class LabelsController @Inject()(messagesAction: MessagesActionBuilder, componen
       // We do not allow quoted records or line separators
       val lines = data.labels.split("\r?\n")
       val labels = lines.map(line => {
-        val cols = line.split(';')
-        assert(cols.length >= 4)
-        Label(cols(0), cols(1), cols(2), cols(3))
+        val cols = line.split(";")
+        // Pad with empty strings if less than four elements
+        val colsPadded = cols ++ Array.fill(4 - math.min(cols.length, 4))("")
+        Label(colsPadded(0), colsPadded(1), colsPadded(2), colsPadded(3))
       })
       val file = File.createTempFile("labels", ".pdf")
       file.deleteOnExit()
