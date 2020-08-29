@@ -1,7 +1,11 @@
 package controllers
 
 import java.io.File
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit.SECONDS
+import java.time.{OffsetDateTime, ZoneId}
 
+import controllers.LabelsController.{formatDateTime, defaultZone}
 import javax.inject.Inject
 import models.Label
 import play.api.data.Form
@@ -23,6 +27,8 @@ class LabelsController @Inject()(messagesAction: MessagesActionBuilder, componen
   }
 
   def createLabels: Action[AnyContent] = messagesAction { implicit request: MessagesRequest[AnyContent] =>
+    val requestStartTS = OffsetDateTime.now(defaultZone)
+
     val errorFunction = { formWithErrors: Form[Data] =>
       // This is the bad case, where the form had validation errors.
       // Let's show the user the form again, with the errors highlighted.
@@ -47,7 +53,7 @@ class LabelsController @Inject()(messagesAction: MessagesActionBuilder, componen
       Ok.sendFile(
         content = file,
         inline = false,
-        fileName = _ => Some("labels.pdf"),
+        fileName = _ => Some(f"labels-${formatDateTime(requestStartTS)}.pdf"),
         onClose = () => file.delete()
       )
     }
@@ -55,4 +61,15 @@ class LabelsController @Inject()(messagesAction: MessagesActionBuilder, componen
     val formValidationResult = form.bindFromRequest
     formValidationResult.fold(errorFunction, successFunction)
   }
+}
+
+object LabelsController {
+  private final val defaultZone = ZoneId.of("UTC")
+
+  /** Formats a timestamp to appear in the default downloaded file name */
+  private def formatDateTime(ts: OffsetDateTime) = ts
+    .truncatedTo(SECONDS)
+    .format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+    // Colon is illegal in filenames in many file systems
+    .replace(':', '-')
 }
