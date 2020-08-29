@@ -30,7 +30,7 @@ object LabelWriter extends Logging {
     // Get width of longest line
     // Result is in thousands of user pt
     val longestGlyphWidth = text.lines.map(font.getWidth).max / 1e3f
-    val fontSize = LABEL_WIDTH.getValue / longestGlyphWidth
+    val fontSize = (LABEL_WIDTH.getValue - 2.6f) / longestGlyphWidth
 
     logger.debug(f"fontSize: $fontSize, maxFontSize: $LABEL_MAX_FONT_SIZE")
     math.min(fontSize, LABEL_MAX_FONT_SIZE)
